@@ -1,0 +1,115 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  user_id      Int       @id @default(autoincrement())
+  user_name    String
+  user_email   String    @unique
+  user_role    UserRole
+  user_password String
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  tasks        Task[]
+  taskUpdates TaskUpdate[]
+  notifications Notification[]
+  emailNotifications EmailNotification[]
+  activityLog ActivityLog[]
+}
+
+model Task {
+  task_id          Int       @id @default(autoincrement())
+  task_title       String
+  task_description String?
+  task_status      TaskStatus
+  priority         Priority
+  assigned_to      Int
+  deadline         DateTime?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+  taskUpdates TaskUpdate[]
+  emailNotifications EmailNotification[]
+
+  user             User      @relation(fields: [assigned_to], references: [user_id])
+}
+
+model TaskUpdate {
+  task_update_id          Int       @id @default(autoincrement())
+  task_id_refrence                 Int
+  task_update_description String
+  task_update_by          Int
+  created_at              DateTime  @default(now())
+
+  task                    Task      @relation(fields: [task_id_refrence], references: [task_id])
+  user                    User      @relation(fields: [task_update_by], references: [user_id])
+}
+
+model Notification {
+  notification_id Int      @id @default(autoincrement())
+  user_notification_id         Int
+  message         String
+  isRead          Boolean  @default(false)
+  created_at      DateTime @default(now())
+
+  // Define the relation to the User model
+  user            User     @relation(fields: [user_notification_id], references: [user_id])
+}
+
+model EmailNotification {
+  email_notification_id Int      @id @default(autoincrement())
+  notification_user_id              Int
+  notification_task_id              Int
+  email                String
+  sent_at              DateTime
+
+  user                 User     @relation(fields: [notification_user_id], references: [user_id])
+  task                 Task     @relation(fields: [notification_task_id], references: [task_id])
+}
+
+model ActivityLog {
+  action_id  Int      @id @default(autoincrement())
+  action_user_id    Int
+  action     Action
+  entity     String
+  entity_id  Int
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [action_user_id], references: [user_id])
+}
+
+enum UserRole {
+  ADMIN
+  USER
+  GUEST
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Action {
+  CREATED
+  UPDATED
+  DELETED
+}

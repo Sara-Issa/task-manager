@@ -1,0 +1,50 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  user_id: ID!
+  user_name: String!
+  user_email: String!
+  user_role: UserRole!
+  user_password: String!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+"""The roles a user can have"""
+enum UserRole {
+  ADMIN
+  USER
+  GUEST
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Query {
+  getAllUsers: [User!]!
+  getUserById(user_id: Int!): User
+}
+
+type Mutation {
+  createUser(createUserInput: CreateUserInput!): User!
+  updateUser(user_id: Int!, updateUserInput: UpdateUserInput!): User!
+  deleteUser(user_id: Int!): User!
+}
+
+input CreateUserInput {
+  user_name: String!
+  user_email: String!
+  user_role: UserRole!
+  user_password: String!
+}
+
+input UpdateUserInput {
+  user_name: String
+  user_email: String
+  user_role: UserRole
+  user_password: String
+}
